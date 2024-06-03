@@ -76,7 +76,6 @@ class MainActivity : AppCompatActivity() {
         //2- Programar el boton
         btnAgregar.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
-
                 //1- Crear un objeto de la clase conexion
                 val objConexion = ClaseConexion().cadenaConexion()
 
@@ -92,6 +91,9 @@ class MainActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main){
                     //Actualizo al adaptador con los datos nuevos
                     (rcvMusica.adapter as? Adaptador)?.actualizarListado(nuevasCanciones)
+                    txtNombre.setText("")
+                    txtDuracion.setText("")
+                    txtAutor.setText("")
                 }
 
 
