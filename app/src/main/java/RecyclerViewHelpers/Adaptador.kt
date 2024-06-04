@@ -3,6 +3,7 @@ package RecyclerViewHelpers
 import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
 import bryan.miranda.crudbryan1b.R
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +11,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import modelo.ClaseConexion
 import modelo.dataClassMusica
+import java.util.UUID
 
 class Adaptador(var Datos: List<dataClassMusica>): RecyclerView.Adapter<ViewHolder>() {
 
@@ -44,6 +46,23 @@ class Adaptador(var Datos: List<dataClassMusica>): RecyclerView.Adapter<ViewHold
         notifyDataSetChanged()
     }
 
+
+    fun actualizarDato(nuevoNombre: String, uuid: String){
+        GlobalScope.launch(Dispatchers.IO){
+            //1- Creo un obj de la clase conexion
+            val objConexion = ClaseConexion().cadenaConexion()
+
+            //2- Creo una variable que contenga un PrepareStatement
+            val updateCancion = objConexion?.prepareStatement("update tbMusica set nombreCancion = ? where uuid = ?")!!
+            updateCancion.setString(1, nuevoNombre)
+            updateCancion.setString(2, uuid)
+            updateCancion.executeUpdate()
+
+            val commit = objConexion.prepareStatement("commit")
+            commit.executeUpdate()
+
+        }
+    }
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -81,8 +100,36 @@ class Adaptador(var Datos: List<dataClassMusica>): RecyclerView.Adapter<ViewHold
             val dialog = builder.create()
             dialog.show()
 
+        }
 
+        //Todo: clic al icono de editar
+        holder.imgEditar.setOnClickListener {
+            //Creo mi Alerta para editar
+            val context = holder.itemView.context
+
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle("Actualizar")
+
+            //Agregarle un cuadro de texto
+            //donde el usuario va a escribir el nuevo nombre
+            val cuadroTexto = EditText(context)
+            cuadroTexto.setHint(item.nombreCancion)
+            builder.setView(cuadroTexto)
+
+            //Botones
+            builder.setPositiveButton("Actualizar"){
+                dialog, wich ->
+                actualizarDato(cuadroTexto.text.toString(), item.uuid)
+            }
+            builder.setNegativeButton("Cancelar"){
+                dialog, wich ->
+                dialog.dismiss()
+            }
+            val dialog = builder.create()
+            dialog.show()
 
         }
+
+
     }
 }
